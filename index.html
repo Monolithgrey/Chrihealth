@@ -8653,11 +8653,7 @@ function _enterApp(name, role, year){
   if(app)   { app.style.opacity='1'; }
 }
 
-// ── Keep app hidden until login completes ──────────────────────
-(function(){
-  const a = document.querySelector('.app');
-  if(a){ a.style.opacity='0'; a.style.transition='opacity .4s ease'; }
-})();
+// ── App is visible immediately — cover sits on top via z-index:999 ──────────
 
 
 /* ════════════════════════════════════════════════
