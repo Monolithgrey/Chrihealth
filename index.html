@@ -59,6 +59,16 @@
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tx); }
+
+/* ── iOS tap fix: all clickable divs register touch ── */
+[onclick], .sb-item, .sb-sub, .sb-section-link, .rs-btn, .mt-btn,
+.ans-opt, .mc-btn-primary, .mc-btn-secondary, .tb-btn, .dash-cta-btn,
+.ex-diff-opt, .lec-row, .ex-back-btn, .prog-action-btn,
+.t-conf-btn, .t-next-btn, .t-submit-btn {
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(37,99,235,.12);
+  touch-action: manipulation;
+}
 body {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
@@ -550,6 +560,9 @@ body {
   border: 1px solid var(--bdr2);
   background: transparent;
   color: var(--tx2);
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(37,99,235,.12);
 }
 .tb-btn:hover { border-color: var(--bdr3); color: var(--tx); background: var(--bg2); }
 .tb-btn.primary {
@@ -601,7 +614,7 @@ body {
 }
 
 /* ═══════════════ SCREENS ═══════════════ */
-.screens { flex:1; overflow:hidden; position:relative; }
+.screens { flex:1; overflow:hidden; position:relative; -webkit-overflow-scrolling:touch; }
 .screen {
   position: absolute;
   inset: 0;
@@ -609,6 +622,7 @@ body {
   overflow-x: hidden;
   display: none;
   background: var(--bg);
+  -webkit-overflow-scrolling: touch;
 }
 .screen.active {
   display: block;
@@ -624,7 +638,26 @@ body {
    SCREEN: DASHBOARD
 ═══════════════════════════════════════ */
 
-.dash { padding: 28px 36px 64px; max-width: 980px; }
+.dash {
+  padding: 28px 36px 64px;
+  max-width: 1280px;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 0 24px;
+  align-items: start;
+}
+.dash-main-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dash-pearl-col {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 /* ─── HERO CARD ─────────────────────────────── */
 /* Name + streak calendar + XP in one unified card */
@@ -2122,7 +2155,9 @@ body {
   position: fixed;
   inset: 0;
   z-index: 999;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ── Cover: warm split layout ────────────────── */
@@ -2824,8 +2859,9 @@ body {
   z-index: 299;
   opacity: 0;
   transition: opacity .22s;
+  pointer-events: none;
 }
-.mob-overlay.open { opacity: 1; }
+.mob-overlay.open { opacity: 1; pointer-events: all; display: block; }
 
 .mob-hamburger {
   display: none;
@@ -2844,13 +2880,32 @@ body {
   transition: all .2s;
 }
 
+/* ── Wide-tablet: collapse XP panel before it clips ── */
+@media (max-width: 1100px) {
+  /* Collapse dash to single column — pearl sidebar goes below */
+  .dash { grid-template-columns: 1fr !important; }
+  .dash-pearl-col { position: static; }
+  /* Collapse hero XP panel to horizontal strip */
+  .dash-hero { grid-template-columns: 1fr; }
+  .dh-xp { border-top: 1px solid var(--bdr); border-left: none; flex-direction: row; align-items: center; gap: 20px; padding: 18px 28px !important; justify-content: flex-start; }
+  .dh-level-ring { width: 56px; height: 56px; flex-shrink: 0; }
+  .dh-xp-info { text-align: left; }
+  .dh-lvl-num { font-size: 20px !important; }
+}
+
 /* ── Tablet: 900px ────────────────────────────── */
 @media (max-width: 900px) {
 
-  /* Cover: hide editorial left panel */
-  .cover-left { display: none; }
-  .cover-screen { grid-template-columns: 1fr; }
-  .cover-right { border-left: none; }
+  /* Cover: stack brand above form on mobile */
+  .cover-screen { grid-template-columns: 1fr; grid-template-rows: auto auto; min-height: 100%; height: auto; }
+  .cover-left { display: flex; flex-direction: column; justify-content: flex-start; padding: 32px 24px 28px; min-height: unset; height: auto; }
+  .cover-left::after { display: none; }
+  .cover-logo { margin-bottom: 20px !important; }
+  .cover-headline { font-size: 30px !important; margin-bottom: 12px !important; line-height: 1.2 !important; }
+  .cover-sub { font-size: 13px !important; margin-bottom: 14px !important; }
+  .cover-proof { gap: 8px !important; }
+  .cover-bottom-strip { display: none; }
+  .cover-right { border-left: none; border-top: 1px solid rgba(0,0,0,.07); min-height: unset; height: auto; padding: 32px 24px 48px; justify-content: flex-start; }
 
   /* Sidebar: fixed overlay, hidden by default */
   .sidebar {
@@ -2869,6 +2924,13 @@ body {
   /* Main fills full width */
   .main { width: 100%; }
 
+  /* Ensure screens scroll and respond to touch on iOS Safari */
+  .screens { overflow: visible; position: static; flex: 1; display: flex; flex-direction: column; }
+  .screen { position: static; display: none; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .screen.active { display: block; }
+  .main { display: flex; flex-direction: column; overflow: hidden; }
+  .app { height: 100dvh; overflow: hidden; }
+
   /* Path wrap: right panel hidden on mobile by default */
   .path-wrap { grid-template-columns: 1fr; }
   .path-right { display: none; }
@@ -2884,7 +2946,9 @@ body {
 
   /* Dashboard: collapse 2-col grids */
   .dash-hero { grid-template-columns: 1fr; }
-  .dh-xp { border-top: 1px solid var(--bdr); border-right: none !important; flex-direction: row; gap: 16px; padding: 18px 24px !important; }
+  .dh-xp { border-top: 1px solid var(--bdr); border-left: none; flex-direction: row; align-items: center; gap: 20px; padding: 18px 24px !important; justify-content: flex-start; }
+  .dh-level-ring { width: 56px; height: 56px; flex-shrink: 0; }
+  .dh-xp-info { text-align: left; }
   .dash-mid { grid-template-columns: 1fr; }
   .dash-bottom { grid-template-columns: 1fr; }
 
@@ -2958,6 +3022,82 @@ body {
   .sg-cell { width: 34px !important; height: 34px !important; font-size: 10px !important; }
 }
 
+
+/* ── Pearl Sidebar ──────────────────────────── */
+.pearl-sidebar-card {
+  background: var(--bg1);
+  border: 1px solid var(--bdr);
+  border-radius: 16px;
+  padding: 20px 20px 18px;
+  box-shadow: 0 2px 12px rgba(30,40,80,.07);
+}
+.psb-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--tx3);
+  display: flex; align-items: center; gap: 7px;
+  margin-bottom: 12px;
+}
+.psb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.psb-cond {
+  font-family: 'Fraunces', serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -.02em; margin-bottom: 8px;
+}
+.psb-tag {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: .08em;
+  padding: 3px 9px; border-radius: 99px; margin-bottom: 14px;
+}
+.psb-headline {
+  font-size: 13.5px; font-weight: 700;
+  color: var(--tx); line-height: 1.45; margin-bottom: 10px;
+}
+.psb-body {
+  font-size: 12.5px; color: var(--tx2);
+  line-height: 1.75; margin-bottom: 14px;
+}
+.psb-trap-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--amber); margin-bottom: 6px;
+}
+.psb-trap {
+  font-size: 12px; color: var(--tx2); line-height: 1.7;
+  background: var(--amber-dim); border-left: 2px solid var(--amber);
+  padding: 8px 12px; border-radius: 0 8px 8px 0; margin-bottom: 16px;
+}
+.psb-btn {
+  width: 100%; background: var(--blue); color: #fff;
+  border: none; border-radius: 10px; padding: 11px 16px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s; letter-spacing: -.01em;
+}
+.psb-btn:hover { background: #1a4fff; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,.28); }
+.pearl-sidebar-next {
+  background: var(--bg1); border: 1px solid var(--bdr);
+  border-radius: 12px; padding: 14px 16px;
+}
+.psn-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--tx4); margin-bottom: 6px;
+}
+.psn-cond { font-size: 13px; font-weight: 600; color: var(--tx2); margin-bottom: 4px; }
+.psn-preview { font-size: 11.5px; color: var(--tx3); line-height: 1.5; }
+.pearl-sidebar-streak {
+  background: var(--bg1); border: 1px solid var(--bdr);
+  border-radius: 12px; padding: 14px 16px;
+}
+.pss-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.pss-label { font-size: 11.5px; color: var(--tx3); font-weight: 500; min-width: 64px; flex-shrink: 0; }
+.pss-track { flex: 1; height: 5px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
+.pss-fill { height: 100%; border-radius: 99px; transition: width .8s ease; }
+.pss-pct { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 700; min-width: 28px; text-align: right; color: var(--tx3); }
+.pss-pct.green { color: var(--green); }
+.pss-pct.blue  { color: var(--blue); }
 
 .ex-back-btn {
   font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700;
@@ -3268,7 +3408,7 @@ body {
       <div class="mt-btn" id="mTrainer" onclick="setMode('trainer')">🎯 Trainer</div>
     </div>
     <div class="notif-btn"><span>🔔</span><div class="notif-dot"></div></div>
-    <div class="tb-btn primary" id="topCta" onclick="goScreen('pathology',document.getElementById('sbPath'));setMode('trainer')">Start Quiz →</div>
+    <button class="tb-btn primary" id="topCta" onclick="goScreen('pathology',document.getElementById('sbPath'));setMode('trainer')">Start Quiz →</button>
   </header>
 
   <div class="screens">
@@ -6835,6 +6975,7 @@ function renderDashboard(){
 
   document.getElementById('dashContent').innerHTML = `
 
+    <div class="dash-main-col">
     <!-- ── HERO CARD: Name + Streak + XP ── -->
     <div class="dash-hero">
       <div class="dh-main">
@@ -6909,8 +7050,8 @@ function renderDashboard(){
             <div class="mc-task">Post to Exchange</div>
           </div>
           <div class="mc-actions">
-            <div class="mc-btn-primary" onclick="showCond('coc','study')">Continue COC →</div>
-            <div class="mc-btn-secondary" onclick="goScreen('pathology',document.getElementById('sbPath'));setMode('trainer')">Quick Quiz</div>
+            <button class="mc-btn-primary" onclick="showCond('coc','study')">Continue COC →</button>
+            <button class="mc-btn-secondary" onclick="goScreen('pathology',document.getElementById('sbPath'));setMode('trainer')">Quick Quiz</button>
           </div>
         </div>
       </div>
@@ -6941,51 +7082,36 @@ function renderDashboard(){
       <div class="cond-list" id="condListRows"></div>
     </div>
 
-    <!-- ── BOTTOM: Pearls + Trainer ── -->
-    <div class="dash-bottom">
-      <div class="pearl-card">
-        <div class="pearl-hdr">
-          <span>🔑</span>
-          <div class="pearl-hdr-label">Daily Pearls</div>
+    <!-- ── BOTTOM: Trainer card only (pearls moved to right col) ── -->
+    <div class="trainer-card" style="margin-top:16px">
+      <div class="tc-label">Diagnosis Trainer</div>
+      <div class="tc-stats">
+        <div>
+          <div class="tc-stat-val">${caseCount}</div>
+          <div class="tc-stat-lbl">Cases</div>
         </div>
-        <div class="pearl-body">
-          <div class="pearl-item">
-            <div class="pearl-cond">OKC / KCOT</div>
-            <div class="pearl-text"><strong>Daughter cysts in the wall = high recurrence risk.</strong> Enucleation alone recurs 25–60%. Carnoy's fixative or peripheral ostectomy required. This is the one you don't want to enucleate and walk away from.</div>
-          </div>
-          <div class="pearl-item">
-            <div class="pearl-cond">Unicystic Ameloblastoma</div>
-            <div class="pearl-text"><strong>Cannot be excluded by imaging alone.</strong> Any pericoronal lucency in a patient under 25 — biopsy first, commit to a surgical plan after pathology. UA mural type needs resection, not enucleation.</div>
-          </div>
-          <div class="pearl-item">
-            <div class="pearl-cond">Radicular Cyst</div>
-            <div class="pearl-text">RC vs granuloma: <strong>same treatment, always.</strong> RCT first. Histology confirms. Don't let the DDx change your initial plan — only what you tell the patient.</div>
-          </div>
+        <div>
+          <div class="tc-stat-val" style="color:var(--green)">${condCount}</div>
+          <div class="tc-stat-lbl">Conditions</div>
+        </div>
+        <div>
+          <div class="tc-stat-val" style="color:var(--purp)">4</div>
+          <div class="tc-stat-lbl">Exchange</div>
         </div>
       </div>
-
-      <div class="trainer-card">
-        <div class="tc-label">Diagnosis Trainer</div>
-        <div class="tc-stats">
-          <div>
-            <div class="tc-stat-val">${caseCount}</div>
-            <div class="tc-stat-lbl">Cases</div>
-          </div>
-          <div>
-            <div class="tc-stat-val" style="color:var(--green)">${condCount}</div>
-            <div class="tc-stat-lbl">Conditions</div>
-          </div>
-          <div>
-            <div class="tc-stat-val" style="color:var(--purp)">4</div>
-            <div class="tc-stat-lbl">Exchange</div>
-          </div>
-        </div>
-        <div class="tc-desc">Recognition drills, DDx traps, radiograph interpretation. Every case has a clinical narrative and attending commentary.</div>
-        <div class="tc-btn" onclick="goScreen('pathology',document.getElementById('sbPath'));setMode('trainer')">
-          🎯 Launch Trainer →
-        </div>
+      <div class="tc-desc">Recognition drills, DDx traps, radiograph interpretation. Every case has a clinical narrative and attending commentary.</div>
+      <div class="tc-btn" onclick="goScreen('pathology',document.getElementById('sbPath'));setMode('trainer')">
+        🎯 Launch Trainer →
       </div>
     </div>
+
+    </div><!-- end dash-main-col -->
+
+    <!-- ── RIGHT COLUMN: Pearl of the Day sidebar ── -->
+    <div class="dash-pearl-col">
+      ${pearlSidebarH()}
+    </div>
+
   `;
 
   // Populate condition list with rich data
@@ -6997,6 +7123,133 @@ function renderDashboard(){
       el.style.width = el.dataset.w;
     });
   }, 120);
+}
+
+function pearlSidebarH(){
+  // Rotate daily — one pearl per day of year
+  const allPearls = [
+    { cond:'Dentigerous Cyst', color:'blue', icon:'🦷',
+      headline:'4mm is the only number that matters',
+      body:'Under 4mm = normal follicle, observe. Over 4mm = Dentigerous Cyst until histology proves otherwise. The entire clinical decision lives in that one measurement.',
+      trap:'The xray cannot tell you if it\'s DC, OKC, or UA. All three look identical. 4mm tells you to biopsy — pathology tells you what it is.',
+      tag:'Boards Threshold' },
+    { cond:'OKC / KCOT', color:'amber', icon:'⚠️',
+      headline:'Daughter cysts = the recurrence engine',
+      body:'OKC recurs because daughter cysts and odontogenic rests survive simple enucleation. Carnoy\'s solution or peripheral ostectomy targets exactly this. Skip it and you\'re planning a re-operation.',
+      trap:'Gorlin Syndrome: any young patient with bilateral or multiple OKCs needs PTCH1 workup, derm referral, and head CT. Missing this is a career-defining error.',
+      tag:'High Recurrence' },
+    { cond:'Unicystic Ameloblastoma', color:'red', icon:'🔬',
+      headline:'Cannot be excluded by imaging — ever',
+      body:'UA is the trap hiding inside every pericoronal lucency in a patient under 30. Radiographically indistinguishable from DC. The only safe rule: biopsy any pericoronal lesion before committing to a surgical plan.',
+      trap:'Luminal UA → enucleation works. Mural UA → resection required. You cannot know the subtype without histology. Treat DC and miss mural UA = recurrence + re-resection.',
+      tag:'Biopsy First' },
+    { cond:'Lateral Periodontal Cyst', color:'green', icon:'🧪',
+      headline:'Vital pulp test splits the entire DDx',
+      body:'LPC sits lateral to vital tooth roots — premolar/canine zone, lower jaw. One EPT: vital = LPC. Non-vital = lateral radicular cyst. That single test collapses the differential.',
+      trap:'Botryoid variant = polycystic/multilocular LPC. Higher recurrence. Don\'t treat it like a simple LPC.',
+      tag:'One Test DDx' },
+    { cond:'Calcifying Odontogenic Cyst', color:'purp', icon:'👻',
+      headline:'Ghost cells are pathognomonic — full stop',
+      body:'No other jaw lesion has ghost cell calcifications. If you see them on histology, the diagnosis is made. Everything else is secondary.',
+      trap:'Gorlin CYST ≠ Gorlin SYNDROME. COC = Gorlin Cyst (one lesion). Gorlin Syndrome = PTCH1 mutation, multiple OKCs + BCCs. Different conditions, dangerously similar names.',
+      tag:'Pathognomonic' },
+    { cond:'Radicular Cyst', color:'blue', icon:'🦷',
+      headline:'RC vs granuloma — same treatment, always',
+      body:'You cannot distinguish RC from periapical granuloma on imaging. They are clinically identical. The correct move: RCT first. Histology follows. Do not let the DDx change your initial plan.',
+      trap:'Rushton bodies in the epithelium = RC confirmed on histology. Eosinophilic curved hyaline structures — memorize the look, you will see them on boards.',
+      tag:'Most Common Jaw Cyst' },
+    { cond:'Residual Cyst', color:'slate', icon:'📋',
+      headline:'Residual ≠ recurrent — different problem, different cause',
+      body:'Residual cyst persists because the original cyst was incompletely removed at extraction. Recurrent cyst comes back after adequate treatment. Same histology, completely different clinical story.',
+      trap:'Prevention: socket curettage at time of extraction. If you leave inflamed tissue behind, the cyst persists. If it grows and you miss it, it can displace a future implant site.',
+      tag:'Prevention' },
+    { cond:'Paradental Cyst', color:'green', icon:'🦷',
+      headline:'Lateral crown position separates it from DC',
+      body:'DC is pericoronal — attaches at the CEJ, surrounds the crown. Paradental is buccal or distal-lateral, driven by pericoronitis inflammation. Same tooth, different anatomy, different diagnosis.',
+      trap:'Buccal Bifurcation Cyst (BBC) = pediatric paradental variant at mandibular first molar. Tooth is vital, eruption is intact. Extraction often unnecessary — enucleation preserves the tooth.',
+      tag:'Pericoronitis Driven' },
+    { cond:'Nasopalatine Duct Cyst', color:'blue', icon:'💙',
+      headline:'6mm — the biopsy threshold for NPDC',
+      body:'Incisive canal up to 6mm = normal anatomy. Above 6mm or enlarging with vital centrals = NPDC until biopsied. Both centrals must be vital — non-vital central flips the DDx to RC.',
+      trap:'Heart-shaped radiolucency is classic but not diagnostic. The vital pulp test on both central incisors is the decisive step. Skip it and you risk extracting a normal tooth.',
+      tag:'Most Common Non-OG Cyst' },
+    { cond:'Nasolabial Cyst', color:'green', icon:'🫧',
+      headline:'Normal X-ray IS the diagnosis',
+      body:'Nasolabial cyst is soft tissue only. No bone involvement, no radiographic finding. A normal panoramic + nasal ala swelling = nasolabial cyst until proven otherwise.',
+      trap:'The trap: ordering a biopsy for a "normal" panoramic. Normal IS the finding. The diagnosis is made clinically — nasal base swelling, soft, fluctuant, normal bone on imaging.',
+      tag:'Soft Tissue Only' },
+    { cond:'Dermoid / Epidermoid', color:'amber', icon:'🟡',
+      headline:'Doughy palpation = sebaceous content = dermoid',
+      body:'Floor of mouth midline mass with doughy consistency = dermoid cyst. The sebaceous content is what makes it feel like a stress ball. Epidermoid is the same location but firmer — keratin only.',
+      trap:'Mylohyoid position determines approach. Above = intraoral excision. Below = submental external approach. Miss this and you plan the wrong surgery.',
+      tag:'Approach Anatomy' },
+    { cond:'Lymphoepithelial Cyst', color:'purp', icon:'🟤',
+      headline:'Lymphoid follicles in the wall = pathognomonic',
+      body:'Oral LEC: small, yellow, floor of mouth or ventral tongue. Normal X-ray. Wall has lymphoid germinal centers — no other cyst has this. Cervical LEC: lateral neck, FNA before any excision.',
+      trap:'Lateral neck LEC in a young adult: FNA first, always. Excising without FNA risks violating surgical planes around an occult SCC primary. That mistake is career-ending.',
+      tag:'FNA First' },
+    { cond:'Thyroglossal Duct Cyst', color:'green', icon:'💚',
+      headline:'Moves with tongue protrusion — pathognomonic',
+      body:'Midline neck mass that moves superiorly when the patient protrudes their tongue = TDC until proven otherwise. The duct remnant connects to the foramen cecum — tongue movement pulls it up.',
+      trap:'Pre-op thyroid ultrasound is mandatory. 1% of patients have no other thyroid tissue — the TDC is their only thyroid. Sistrunk without US = risk of permanent hypothyroidism.',
+      tag:'Sistrunk Procedure' },
+    { cond:'Stafne Bone Defect', color:'slate', icon:'🦴',
+      headline:'Below the IAN canal — the entire diagnosis',
+      body:'Stafne is a lingual cortical depression from submandibular salivary gland pressure. Not a true cyst. Pathognomonic location: BELOW the inferior alveolar nerve canal. Static on serial imaging.',
+      trap:'Never biopsy a Stafne on panoramic alone. If IAN position is ambiguous → CT first. MRI confirms salivary T1 signal. Biopsy risks the IAN for a non-pathologic finding.',
+      tag:'Do Not Biopsy' },
+  ];
+
+  // Pick today's pearl — rotate by day of year
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+  const p = allPearls[dayOfYear % allPearls.length];
+  const next = allPearls[(dayOfYear + 1) % allPearls.length];
+
+  const colorMap = {blue:'var(--blue)', amber:'var(--amber)', red:'var(--red)', green:'var(--green)', purp:'var(--purp)', slate:'var(--tx3)'};
+  const dimMap   = {blue:'var(--blue-dim)', amber:'var(--amber-dim)', red:'var(--red-dim)', green:'var(--green-dim)', purp:'rgba(148,97,255,.08)', slate:'var(--bg2)'};
+
+  return `
+    <div class="pearl-sidebar-card">
+      <div class="psb-eyebrow">
+        <span class="psb-dot" style="background:${colorMap[p.color]}"></span>
+        Pearl of the Day
+      </div>
+      <div class="psb-cond" style="color:${colorMap[p.color]}">${p.icon} ${p.cond}</div>
+      <div class="psb-tag" style="background:${dimMap[p.color]};color:${colorMap[p.color]}">${p.tag}</div>
+      <div class="psb-headline">${p.headline}</div>
+      <div class="psb-body">${p.body}</div>
+      <div class="psb-trap-label">⚠ The Trap</div>
+      <div class="psb-trap">${p.trap}</div>
+      <button class="psb-btn" onclick="showCond('${allPearls.findIndex(x=>x.cond===p.cond)>=0 ? Object.keys(CONDITIONS)[allPearls.findIndex(x=>x.cond===p.cond)] : 'dc'}','study')">
+        Study ${p.cond} →
+      </button>
+    </div>
+
+    <div class="pearl-sidebar-next">
+      <div class="psn-label">Tomorrow's Pearl</div>
+      <div class="psn-cond">${next.icon} ${next.cond}</div>
+      <div class="psn-preview">${next.headline}</div>
+    </div>
+
+    <div class="pearl-sidebar-streak">
+      <div class="psb-eyebrow"><span class="psb-dot" style="background:var(--amber)"></span>Module Progress</div>
+      <div class="pss-row">
+        <div class="pss-label">Module 1</div>
+        <div class="pss-track"><div class="pss-fill" style="width:0;background:var(--green)" data-w="100%"></div></div>
+        <div class="pss-pct green">100%</div>
+      </div>
+      <div class="pss-row">
+        <div class="pss-label">Module 2</div>
+        <div class="pss-track"><div class="pss-fill" style="width:0;background:var(--blue)" data-w="65%"></div></div>
+        <div class="pss-pct blue">65%</div>
+      </div>
+      <div class="pss-row" style="opacity:.45">
+        <div class="pss-label">Module 3</div>
+        <div class="pss-track"><div class="pss-fill" style="width:0;background:var(--tx4)" data-w="0%"></div></div>
+        <div class="pss-pct" style="color:var(--tx4)">Q3</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderCondList(){
@@ -8454,7 +8707,8 @@ function openMobNav(){
   const ov = document.getElementById('mobOverlay');
   if(!sb || !ov) return;
   sb.classList.add('mob-open');
-  ov.classList.add('open');
+  ov.style.display = 'block';
+  requestAnimationFrame(()=>{ ov.classList.add('open'); });
   document.body.style.overflow = 'hidden';
 }
 function closeMobNav(){
@@ -8463,6 +8717,7 @@ function closeMobNav(){
   if(!sb || !ov) return;
   sb.classList.remove('mob-open');
   ov.classList.remove('open');
+  setTimeout(()=>{ ov.style.display = 'none'; }, 240);
   document.body.style.overflow = '';
 }
 
