@@ -2939,23 +2939,31 @@ body {
     display: flex; flex-direction: column;
     min-height: 100%;
   }
+  /* Cover: compact header bar on mobile — headline sits above form in one view */
+  .cover-screen {
+    display: flex; flex-direction: column;
+    min-height: 100%;
+  }
   .cover-left {
     display: flex; flex-direction: column;
-    padding: 28px 24px 24px;
+    padding: 24px 24px 20px;
     background: #faf8f4;
+    flex-shrink: 0;
   }
   .cover-left::after { display: none; }
-  .cover-logo { margin-bottom: 16px !important; }
-  .cover-headline { font-size: 26px !important; line-height: 1.15 !important; margin-bottom: 10px !important; }
-  .cover-sub { font-size: 13px !important; line-height: 1.55 !important; margin-bottom: 14px !important; }
-  .cover-proof { gap: 8px !important; }
-  .cover-proof-text { font-size: 12.5px !important; }
+  /* Hide the large decorative left content — show compact version */
+  .cover-left-bottom { display: none; }
+  .cover-logo { margin-bottom: 12px !important; }
+  .cover-headline { font-size: 22px !important; line-height: 1.2 !important; margin-bottom: 0 !important; }
+  .cover-sub { display: none; }
+  .cover-proof { display: none; }
   .cover-bottom-strip { display: none; }
   .cover-right {
     border-left: none;
     border-top: 1px solid rgba(0,0,0,.08);
-    padding: 28px 24px 48px !important;
+    padding: 24px 24px 40px !important;
     flex: 1;
+    background: #fff;
   }
   .login-form-wrap { max-width: 100%; }
 
