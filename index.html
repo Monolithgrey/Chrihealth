@@ -58,7 +58,8 @@
 
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tx); }
+html { height: 100%; overflow: hidden; background: var(--bg); color: var(--tx); }
+body { height: 100%; overflow: hidden; background: var(--bg); color: var(--tx); }
 
 /* ── iOS tap fix: all clickable divs register touch ── */
 [onclick], .sb-item, .sb-sub, .sb-section-link, .rs-btn, .mt-btn,
@@ -85,7 +86,7 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 99px; }
 
 /* ═══════════════ APP SHELL ═══════════════ */
-.app { display:flex; height:100vh; overflow:hidden; }
+.app { display:flex; height:100vh; height:100dvh; overflow:hidden; }
 
 /* ═══════════════ SIDEBAR ═══════════════ */
 .sidebar {
@@ -614,15 +615,16 @@ body {
 }
 
 /* ═══════════════ SCREENS ═══════════════ */
-.screens { flex:1; overflow:hidden; position:relative; -webkit-overflow-scrolling:touch; }
+.screens { flex:1; overflow:hidden; position:relative; }
 .screen {
   position: absolute;
-  inset: 0;
-  overflow-y: auto;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: scroll;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   display: none;
   background: var(--bg);
-  -webkit-overflow-scrolling: touch;
 }
 .screen.active {
   display: block;
@@ -2155,9 +2157,10 @@ body {
   position: fixed;
   inset: 0;
   z-index: 999;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 /* ── Cover: warm split layout ────────────────── */
@@ -2445,9 +2448,9 @@ body {
 ════════════════════════════════════════════════ */
 
 /* Screen containers */
-#screen-exchange { display:none; flex-direction:column; overflow:hidden; }
-#screen-exchange.active { display:flex; }
-#screen-lectures { display:none; overflow-y:auto; }
+#screen-exchange { display:none; flex-direction:column; }
+#screen-exchange.active { display:flex; overflow-y:scroll; -webkit-overflow-scrolling:touch; }
+#screen-lectures { display:none; }
 #screen-lectures.active { display:block; }
 
 /* Index */
@@ -2915,26 +2918,20 @@ body {
      scroll root and let html/body be natural height.
   ─────────────────────────────────────────────── */
   html, body { height: 100%; overflow: hidden; }
-  .app { height: 100dvh; height: 100vh; overflow: hidden; display: flex; }
+  .app { height: 100dvh; overflow: hidden; display: flex; }
   .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
   .screens { flex: 1; overflow: hidden; position: relative; }
   .screen {
-    position: absolute; inset: 0;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     overflow-y: scroll;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     display: none;
   }
   .screen.active { display: block; }
 
   /* ── COVER PAGE ───────────────────────────── */
-  #coverScreen {
-    position: fixed; inset: 0;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
-    display: none;
-  }
-  #coverScreen.active { display: block; }
   .cover-screen {
     display: flex; flex-direction: column;
     min-height: 100%;
