@@ -2881,147 +2881,178 @@ body {
 }
 
 /* ── Wide-tablet: collapse XP panel before it clips ── */
+/* ════════════════════════════════════════════════
+   RESPONSIVE — CHRI HEALTH
+   Three breakpoints: 1100 · 900 · 600
+   Core fix: iOS Safari needs the SCREEN itself
+   to scroll, not a hidden parent. We switch to
+   100dvh app shell + scrollable .screen on mobile.
+════════════════════════════════════════════════ */
+
+/* ── 1100px: wide tablet / small laptop ── */
 @media (max-width: 1100px) {
-  /* Collapse dash to single column — pearl sidebar goes below */
   .dash { grid-template-columns: 1fr !important; }
   .dash-pearl-col { position: static; }
-  /* Collapse hero XP panel to horizontal strip */
   .dash-hero { grid-template-columns: 1fr; }
-  .dh-xp { border-top: 1px solid var(--bdr); border-left: none; flex-direction: row; align-items: center; gap: 20px; padding: 18px 28px !important; justify-content: flex-start; }
+  .dh-xp {
+    border-top: 1px solid var(--bdr); border-left: none;
+    flex-direction: row; align-items: center;
+    gap: 20px; padding: 18px 28px !important;
+    justify-content: flex-start;
+  }
   .dh-level-ring { width: 56px; height: 56px; flex-shrink: 0; }
   .dh-xp-info { text-align: left; }
   .dh-lvl-num { font-size: 20px !important; }
 }
 
-/* ── Tablet: 900px ────────────────────────────── */
+/* ── 900px: tablet + all phones ── */
 @media (max-width: 900px) {
 
-  /* Cover: stack brand above form on mobile */
-  .cover-screen { grid-template-columns: 1fr; grid-template-rows: auto auto; min-height: 100%; height: auto; }
-  .cover-left { display: flex; flex-direction: column; justify-content: flex-start; padding: 24px 20px 20px; min-height: unset; height: auto; }
-  .cover-left::after { display: none; }
-  .cover-logo { margin-bottom: 12px !important; }
-  .cover-headline { font-size: 24px !important; margin-bottom: 8px !important; line-height: 1.15 !important; }
-  .cover-sub { font-size: 12px !important; margin-bottom: 12px !important; line-height: 1.5 !important; }
-  .cover-proof { gap: 6px !important; }
-  .cover-proof-item { gap: 8px !important; }
-  .cover-proof-text { font-size: 12px !important; line-height: 1.4 !important; }
-  .cover-bottom-strip { display: none; }
-  .cover-right { border-left: none; border-top: 1px solid rgba(0,0,0,.07); min-height: unset; height: auto; padding: 24px 20px 40px; justify-content: flex-start; }
+  /* ── ROOT SCROLL FIX ──────────────────────────
+     iOS Safari ignores overflow-y:auto on children
+     when any ancestor is overflow:hidden and has a
+     fixed height. Solution: make the .screen the
+     scroll root and let html/body be natural height.
+  ─────────────────────────────────────────────── */
+  html, body { height: 100%; overflow: hidden; }
+  .app { height: 100dvh; height: 100vh; overflow: hidden; display: flex; }
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+  .screens { flex: 1; overflow: hidden; position: relative; }
+  .screen {
+    position: absolute; inset: 0;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    display: none;
+  }
+  .screen.active { display: block; }
 
-  /* Sidebar: fixed overlay, hidden by default */
+  /* ── COVER PAGE ───────────────────────────── */
+  #coverScreen {
+    position: fixed; inset: 0;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    display: none;
+  }
+  #coverScreen.active { display: block; }
+  .cover-screen {
+    display: flex; flex-direction: column;
+    min-height: 100%;
+  }
+  .cover-left {
+    display: flex; flex-direction: column;
+    padding: 28px 24px 24px;
+    background: #faf8f4;
+  }
+  .cover-left::after { display: none; }
+  .cover-logo { margin-bottom: 16px !important; }
+  .cover-headline { font-size: 26px !important; line-height: 1.15 !important; margin-bottom: 10px !important; }
+  .cover-sub { font-size: 13px !important; line-height: 1.55 !important; margin-bottom: 14px !important; }
+  .cover-proof { gap: 8px !important; }
+  .cover-proof-text { font-size: 12.5px !important; }
+  .cover-bottom-strip { display: none; }
+  .cover-right {
+    border-left: none;
+    border-top: 1px solid rgba(0,0,0,.08);
+    padding: 28px 24px 48px !important;
+    flex: 1;
+  }
+  .login-form-wrap { max-width: 100%; }
+
+  /* ── SIDEBAR OVERLAY ─────────────────────── */
   .sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
     z-index: 300;
-    width: min(var(--sb), 85vw);
+    width: min(280px, 85vw);
     transform: translateX(-110%);
     transition: transform .24s cubic-bezier(.4,0,.2,1);
-    box-shadow: 4px 0 32px rgba(0,0,0,.18);
+    box-shadow: 4px 0 32px rgba(0,0,0,.2);
   }
   .sidebar.mob-open { transform: translateX(0); }
   .mob-overlay { display: block; }
   .mob-hamburger { display: flex; }
+  .tb-mono { display: none; }
 
-  /* Main fills full width */
-  .main { width: 100%; }
+  /* ── TOPBAR ──────────────────────────────── */
+  .topbar { padding: 0 12px; gap: 8px; }
+  #topCta { font-size: 11px !important; padding: 6px 10px !important; }
+  .mt-btn { font-size: 11px !important; padding: 5px 9px !important; }
 
-  /* Ensure screens scroll and respond to touch on iOS Safari */
-  .screens { overflow: visible; position: static; flex: 1; display: flex; flex-direction: column; }
-  .screen { position: static; display: none; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .screen.active { display: block; }
-  .main { display: flex; flex-direction: column; overflow: hidden; }
-  .app { height: 100dvh; overflow: hidden; }
+  /* ── DASHBOARD ───────────────────────────── */
+  .dash { padding: 16px 16px 80px; }
+  .dash-hero { grid-template-columns: 1fr; }
+  .dh-main { padding: 20px 20px 18px; }
+  .dh-name { font-size: 26px !important; }
+  .dh-xp {
+    border-top: 1px solid var(--bdr); border-left: none;
+    flex-direction: row; align-items: center;
+    gap: 16px; padding: 16px 20px !important;
+    justify-content: flex-start;
+  }
+  .dh-level-ring { width: 52px; height: 52px; flex-shrink: 0; }
+  .dh-xp-info { text-align: left; }
+  .dash-mid { grid-template-columns: 1fr; gap: 12px; }
+  .dash-bottom { grid-template-columns: 1fr; gap: 12px; }
+  .dash-stats { flex-direction: row; flex-wrap: wrap; }
+  .dash-stat-card { flex: 1; min-width: 140px; }
+  .sg-cell { width: 30px !important; height: 30px !important; font-size: 9px !important; }
 
-  /* Path wrap: right panel hidden on mobile by default */
+  /* ── STUDY / PATHOLOGY ───────────────────── */
   .path-wrap { grid-template-columns: 1fr; }
   .path-right { display: none; }
+  .teach-wrap { padding: 24px 20px 80px; }
+  .teach-title { font-size: 32px !important; }
+  .teach-tagrow { margin-bottom: 20px !important; }
+  .teach-fp-row { gap: 8px !important; flex-wrap: wrap; }
+  .teach-vs-hdr,
+  .teach-vs-row { grid-template-columns: 100px 1fr 1fr !important; }
 
-  /* Exchange thread → stack */
+  /* ── TRAINER ─────────────────────────────── */
+  .trainer-inner { padding: 20px 16px 80px; max-width: 100%; }
+  .t-title { font-size: 24px !important; }
+  .case-body { padding: 18px 16px 20px; }
+  .case-vig { font-size: 14px !important; line-height: 1.7 !important; }
+  .finds-row { flex-wrap: wrap; gap: 6px; }
+  .ans-grid { gap: 8px !important; }
+  .ans-opt { padding: 14px 14px; font-size: 13.5px; }
+  .t-dots { gap: 4px !important; }
+  .t-dot { width: 7px !important; height: 7px !important; }
+
+  /* ── COMPARE TABLE ───────────────────────── */
+  .cmp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cmp-table { min-width: 600px; }
+
+  /* ── EXCHANGE / LECTURES ─────────────────── */
   .ex-thread-layout,
   .ex-thread.show { grid-template-columns: 1fr !important; }
-  .ex-case-panel { border-right: none; border-bottom: 1px solid var(--bdr); max-height: 45vh; overflow-y: auto; }
-
-  /* Lecture detail → stack */
+  .ex-case-panel { border-right: none; border-bottom: 1px solid var(--bdr); max-height: 40vh; overflow-y: auto; }
   .lec-detail-body { grid-template-columns: 1fr !important; }
   .lec-detail-right { order: -1; }
-
-  /* Dashboard: collapse 2-col grids */
-  .dash-hero { grid-template-columns: 1fr; }
-  .dh-xp { border-top: 1px solid var(--bdr); border-left: none; flex-direction: row; align-items: center; gap: 20px; padding: 18px 24px !important; justify-content: flex-start; }
-  .dh-level-ring { width: 56px; height: 56px; flex-shrink: 0; }
-  .dh-xp-info { text-align: left; }
-  .dash-mid { grid-template-columns: 1fr; }
-  .dash-bottom { grid-template-columns: 1fr; }
-
-  /* Compare table: allow horizontal scroll */
-  .cmp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .cmp-table { min-width: 640px; }
-
-  /* Trainer: tighten padding */
-  .trainer-inner { padding: 24px 20px 100px; }
-
-  /* Teach wrap: tighten padding */
-  .teach-wrap { padding: 28px 20px 80px; }
-
-  /* Dash: tighten padding */
-  .dash { padding: 20px 16px 80px; }
-
-  /* General content wraps */
   .ex-index-wrap,
   .lec-wrap,
   .lec-detail-wrap,
-  .prog-wrap { padding: 24px 16px 80px !important; }
+  .prog-wrap { padding: 20px 16px 80px !important; }
 
-  /* Topbar: show hamburger, hide date mono */
-  .tb-mono { display: none; }
-
-  /* Mode toggle: shrink text */
-  .mt-btn { font-size: 11px !important; padding: 6px 10px !important; }
+  /* ── RESULTS ─────────────────────────────── */
+  .results-screen { padding: 20px 16px 80px !important; }
+  .prog-score-row { flex-direction: column; gap: 12px; text-align: center; }
+  .prog-conf-row { flex-direction: column; }
 }
 
-/* ── Phone: 600px ────────────────────────────── */
+/* ── 600px: phones only ── */
 @media (max-width: 600px) {
-
-  /* Cover form */
-  .cover-right { padding: 28px 20px; }
-  .login-form-wrap { max-width: 100%; }
-
-  /* Topbar CTA: shorten */
-  #topCta { font-size: 11px !important; padding: 6px 10px !important; }
-
-  /* Typography scale-down */
-  .t-title { font-size: 24px !important; }
-  .t-sub { font-size: 13px !important; }
+  .teach-title { font-size: 28px !important; }
+  .teach-aka { font-size: 15px !important; }
   .lec-detail-title { font-size: 20px !important; }
-  .ex-index-title, .lec-header-title { font-size: 26px !important; }
-  .dh-name { font-size: 24px !important; }
-
-  /* Trainer: full-bleed xray on phone */
-  /* Trainer xray: full bleed on phone */
-  .case-card { border-radius: 10px !important; }
+  .ex-index-title, .lec-header-title { font-size: 24px !important; }
+  .t-title { font-size: 22px !important; }
   .xray-panel { border-radius: 0 !important; }
-
-  /* Answer options: larger tap targets */
-  .ans-opt { padding: 15px 14px; font-size: 14px; }
-
-  /* Findings grid: 1 col on phone */
-  .finds-grid { grid-template-columns: 1fr !important; }
-
-  /* Reasoning rows: stack key/value */
-  .rsn-row { flex-direction: column; gap: 4px; }
-  .rsn-key { min-width: unset !important; }
-
-  /* Mission card conditions: 1 col */
-  .cond-list { gap: 6px; }
-  .cond-row { flex-wrap: wrap; }
-
-  /* Prog confidence row: stack */
-  .prog-conf-row { flex-direction: column; }
-  .prog-score-row { flex-direction: column; gap: 12px; text-align: center; }
-
-  /* Streak grid cells: slightly larger */
-  .sg-cell { width: 34px !important; height: 34px !important; font-size: 10px !important; }
+  .ans-opt { padding: 15px 14px; font-size: 14px; min-height: 52px; }
+  .finds-row { gap: 5px; }
+  .rsn-row { flex-direction: column; gap: 3px; }
+  .rsn-key { min-width: unset !important; font-size: 9px !important; }
+  .prog-cond-name { min-width: 120px !important; font-size: 12px !important; }
 }
 
 
